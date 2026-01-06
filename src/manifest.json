@@ -8,7 +8,8 @@
         "scripting",
         "activeTab",
         "sidePanel",
-        "userScripts"
+        "userScripts",
+        "tabs"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -25,5 +26,16 @@
     },
     "icons": {
         "128": "icons/icon128.png"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "src/content/picker.ts",
+                "src/content/injector.ts"
+            ]
+        }
+    ]
 }

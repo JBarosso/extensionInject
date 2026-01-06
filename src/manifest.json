@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "Injector Pro",
+    "version": "1.0.0",
+    "description": "Premium CSS and JS injection tool with Sidepanel interface.",
+    "permissions": [
+        "storage",
+        "scripting",
+        "activeTab",
+        "sidePanel",
+        "userScripts"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "src/background/index.ts",
+        "type": "module"
+    },
+    "side_panel": {
+        "default_path": "src/sidepanel/index.html"
+    },
+    "action": {
+        "default_title": "Open Injector Pro"
+    },
+    "icons": {
+        "128": "icons/icon128.png"
+    }
+}

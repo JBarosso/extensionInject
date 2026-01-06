@@ -274,7 +274,7 @@ export default function App() {
                         )} onClick={() => setGlobalEnabled(!globalEnabled)}>
                             <span className="text-[10px] font-black uppercase tracking-widest pointer-events-none">Global</span>
                             <div className={cn("w-8 h-4 rounded-full relative transition-colors pointer-events-none", globalEnabled ? "bg-indigo-500" : "bg-slate-400 dark:bg-slate-600")}>
-                                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all shadow-sm", globalEnabled ? "translate-x-4.5" : "translate-x-0.5")} />
+                                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-200 shadow-sm", globalEnabled ? "translate-x-[18px]" : "translate-x-[2px]")} />
                             </div>
                         </div>
                     </div>

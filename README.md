@@ -1,4 +1,4 @@
-# 🎨 Injector Pro
+# 🎨 Injector Styles
 
 > Extension Chrome moderne pour injecter et personnaliser du CSS sur n'importe quel site web avec une interface intuitive et des fonctionnalités avancées.
 
@@ -41,8 +41,8 @@
 
 1. **Cloner le repository**
    ```bash
-   git clone https://github.com/votre-username/injector-pro.git
-   cd injector-pro
+   git clone https://github.com/votre-username/extensionInject.git
+   cd extensionInject
    ```
 
 2. **Installer les dépendances**
@@ -190,7 +190,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 📧 Contact
 
-Pour toute question ou suggestion, n'hésitez pas à ouvrir une [issue](https://github.com/votre-username/injector-pro/issues).
+Pour toute question ou suggestion, n'hésitez pas à ouvrir une [issue](https://github.com/votre-username/extensionInject/issues).
 
 ---
 

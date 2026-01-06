@@ -253,13 +253,13 @@ export default function App() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-300">
+        <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 grid grid-rows-[auto_1fr_auto] transition-colors duration-300 overflow-hidden">
             {/* Header */}
-            <header className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 sticky top-0 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md z-20">
+            <header className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md z-20">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-600/20">I</div>
-                        <h1 className="font-bold text-lg tracking-tight">Injector Pro</h1>
+                        <h1 className="font-bold text-lg tracking-tight">Injector Style</h1>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-slate-500">
@@ -320,8 +320,8 @@ export default function App() {
                 </div>
             </header>
 
-            <main className="flex-1 p-4 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
-                <div className="flex flex-col gap-4">
+            <main className="p-4 h-full overflow-hidden">
+                <div className="h-full grid grid-rows-[auto_auto_1fr] gap-4">
                     {/* Picker Button */}
                     <button onClick={togglePicker} className={cn("group w-full py-4 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-2 border-dashed", isPicking ? "bg-indigo-600 border-indigo-400 text-white animate-pulse" : "bg-indigo-50 dark:bg-indigo-900/10 border-indigo-200 dark:border-indigo-900/30 text-indigo-600 hover:border-indigo-400")}>
                         <MousePointer2 size={24} className={cn("transition-transform group-hover:scale-110", isPicking && "animate-bounce")} />
@@ -351,9 +351,9 @@ export default function App() {
                     </div>
 
                     {viewMode === 'code' ? (
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-3 min-h-0 h-full overflow-hidden">
                             {generatedVisualCSSForCurrentTab && (
-                                <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                                <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl shrink-0">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
                                             <Sparkles size={12} /> Code Visuel Généré
@@ -367,29 +367,18 @@ export default function App() {
                                     </pre>
                                 </div>
                             )}
-                            <div className="group relative">
+                            <div className="group relative flex-1 min-h-0">
                                 <textarea
                                     value={currentTab === 'global' ? globalCSS : currentSiteConfig.css}
                                     onChange={(e) => currentTab === 'global' ? setGlobalCSS(e.target.value) : updateSiteConfig({ css: e.target.value })}
                                     spellCheck={false}
-                                    className="w-full h-80 p-4 bg-slate-900 text-blue-300 font-mono text-sm rounded-2xl border border-slate-800 focus:border-indigo-500 outline-none resize-none transition-all"
+                                    className="w-full h-full p-4 bg-slate-900 text-blue-300 font-mono text-sm rounded-2xl border border-slate-800 focus:border-indigo-500 outline-none resize-none transition-all custom-scrollbar"
                                     placeholder={`/* Votre CSS personnalisé ici */`}
                                 />
-                                {hasContentToReset && (
-                                    <div className="absolute bottom-4 right-4 animate-in fade-in zoom-in duration-300">
-                                        <button
-                                            onClick={handleReset}
-                                            className="p-2 bg-red-500/80 text-white rounded-lg hover:bg-red-600 transition-all shadow-lg flex items-center gap-2 text-[10px] font-bold px-3"
-                                            title="Tout effacer"
-                                        >
-                                            <Trash2 size={14} /> Reset
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 min-h-0 h-full">
                             {selectedSelector ? (
                                 <VisualEditor
                                     selector={selectedSelector}
@@ -397,7 +386,7 @@ export default function App() {
                                     onUpdate={(props) => updateVisualEdit(selectedSelector, props)}
                                 />
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <div className="flex flex-col items-center justify-center h-full py-12 text-center bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 shrink-0">
                                     <Layout size={32} className="text-slate-300 mb-2" />
                                     <p className="text-sm text-slate-500 font-medium">Prêt à éditer !</p>
                                     <p className="text-[10px] text-slate-400 mt-1">Sélectionnez un élément sur la page</p>
@@ -406,7 +395,7 @@ export default function App() {
 
                             {/* History */}
                             {Object.keys(currentTab === 'global' ? globalVisualEdits : currentSiteConfig.visualEdits).length > 0 && (
-                                <div className="flex flex-col gap-2 mt-2">
+                                <div className="flex flex-col gap-2 mt-2 shrink-0">
                                     <div className="flex items-center justify-between px-1">
                                         <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sélecteurs actifs</h3>
                                     </div>

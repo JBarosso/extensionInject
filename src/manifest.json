@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Injector Pro",
+    "name": "Injector Style",
     "version": "1.0.0",
     "description": "Premium CSS and JS injection tool with Sidepanel interface.",
     "permissions": [

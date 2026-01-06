@@ -45,6 +45,8 @@
         document.removeEventListener('click', onClick, true);
         document.removeEventListener('keydown', onKeyDown);
         document.body.style.cursor = '';
+        hoveredElement = null;
+        overlay.style.display = 'none';
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -99,8 +101,13 @@
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         if (msg.type === 'START_PICKER') {
             startPicking();
+            sendResponse({ status: 'started' });
+        } else if (msg.type === 'STOP_PICKER') {
+            stopPicking();
+            sendResponse({ status: 'stopped' });
         } else if (msg.type === 'PING') {
             sendResponse({ type: 'PONG' });
         }
+        return true; // Indique qu'on répondra de manière asynchrone si nécessaire
     });
 })();

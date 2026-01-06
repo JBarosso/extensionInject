@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Minus, Plus, Type, Palette, Move, Square } from 'lucide-react';
+import { Eye, EyeOff, Minus, Plus, Type, Palette, Move, Square, GripVertical } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -11,9 +11,11 @@ interface VisualEditorProps {
     selector: string;
     onUpdate: (properties: Record<string, string>) => void;
     currentProperties: Record<string, string>;
+    tabId?: number | null;
 }
 
-export default function VisualEditor({ selector, onUpdate, currentProperties }: VisualEditorProps) {
+export default function VisualEditor({ selector, onUpdate, currentProperties, tabId }: VisualEditorProps) {
+    const [isDragging, setIsDragging] = useState(false);
     const updateProp = (prop: string, value: string) => {
         onUpdate({ ...currentProperties, [prop]: value });
     };
@@ -23,6 +25,51 @@ export default function VisualEditor({ selector, onUpdate, currentProperties }: 
         delete next[prop];
         onUpdate(next);
     };
+
+    const toggleDragMode = () => {
+        const next = !isDragging;
+        setIsDragging(next);
+
+        if (next && tabId) {
+            // Activer le mode drag dans le content script
+            chrome.tabs.sendMessage(tabId, {
+                type: 'START_DRAG',
+                payload: { selector }
+            });
+        } else if (tabId) {
+            // Désactiver le mode drag
+            chrome.tabs.sendMessage(tabId, {
+                type: 'STOP_DRAG'
+            });
+        }
+
+        // Activer position fixed si on active le drag
+        if (next) {
+            const hasPosition = currentProperties['position'] === 'fixed' || currentProperties['position'] === 'absolute';
+            if (!hasPosition) {
+                updateProp('position', 'fixed');
+            }
+        }
+    };
+
+    // Écouter les mises à jour de position depuis le content script
+    useEffect(() => {
+        const messageListener = (message: any) => {
+            if (message.type === 'ELEMENT_DRAGGED' && message.payload.selector === selector) {
+                const { top, left } = message.payload;
+                const newProps = {
+                    ...currentProperties,
+                    top: `${top}px`,
+                    left: `${left}px`,
+                    position: currentProperties['position'] || 'fixed'
+                };
+                onUpdate(newProps);
+            }
+        };
+
+        chrome.runtime.onMessage.addListener(messageListener);
+        return () => chrome.runtime.onMessage.removeListener(messageListener);
+    }, [selector, currentProperties, onUpdate]);
 
     return (
         <div className="flex flex-col gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
@@ -112,6 +159,30 @@ export default function VisualEditor({ selector, onUpdate, currentProperties }: 
                         onChange={(e) => updateProp('color', e.target.value)}
                         className="w-full h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer overflow-hidden p-0"
                     />
+                </div>
+
+                {/* Drag & Drop Mode */}
+                <div className="flex flex-col gap-1.5 col-span-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 mb-1">
+                        <GripVertical size={10} /> Position Avancée
+                    </label>
+                    <button
+                        onClick={toggleDragMode}
+                        className={cn(
+                            "py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2",
+                            isDragging
+                                ? "bg-indigo-600 border-indigo-400 text-white"
+                                : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                        )}
+                    >
+                        <Move size={14} />
+                        {isDragging ? 'Mode Drag Actif' : 'Activer Drag & Drop'}
+                    </button>
+                    {isDragging && (
+                        <p className="text-[9px] text-slate-400 text-center">
+                            Cliquez et glissez l'élément sur la page pour le repositionner
+                        </p>
+                    )}
                 </div>
 
                 {/* Layout */}

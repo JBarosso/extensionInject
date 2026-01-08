@@ -102,12 +102,15 @@
         if (msg.type === 'START_PICKER') {
             startPicking();
             sendResponse({ status: 'started' });
+            return false; // Réponse synchrone
         } else if (msg.type === 'STOP_PICKER') {
             stopPicking();
             sendResponse({ status: 'stopped' });
+            return false; // Réponse synchrone
         } else if (msg.type === 'PING') {
             sendResponse({ type: 'PONG' });
+            return false; // Réponse synchrone
         }
-        return true; // Indique qu'on répondra de manière asynchrone si nécessaire
+        return false; // Pas de réponse pour les autres messages
     });
 })();

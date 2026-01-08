@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
-import { Info, Zap, X, Code2, FileCode2, Globe, MousePointer2, Sparkles, Layout, Monitor, Moon, Sun, AlertTriangle, RefreshCw, Copy, RotateCcw, Trash2, FolderTree, Plus, Edit2, BookOpen, Play, Square } from 'lucide-react'
+import { Info, Zap, X, Code2, FileCode2, Globe, MousePointer2, Sparkles, Layout, Monitor, Moon, Sun, AlertTriangle, RefreshCw, Copy, RotateCcw, Trash2, FolderTree, Plus, Edit2, BookOpen, Play, Square, CheckCircle2 } from 'lucide-react'
 
 import { clsx, type ClassValue } from 'clsx'
 
@@ -142,7 +142,17 @@ export default function App() {
 
                 if (tabIdRef.current) {
 
-                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' })
+                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' }, () => {
+
+                        // Ignorer les erreurs silencieusement
+
+                        if (chrome.runtime.lastError) {
+
+                            // Erreur normale si le content script n'est pas chargé
+
+                        }
+
+                    })
 
                 }
 
@@ -385,6 +395,13 @@ input, textarea, select {
 
                 })
 
+                // Déclencher aussi une réinjection complète via le background script pour les iframes
+                chrome.runtime.sendMessage({ type: 'REFRESH_INJECTION' }, () => {
+                    // Ignorer les erreurs silencieusement
+                    if (chrome.runtime.lastError) {
+                        // Erreur normale si le background script n'est pas disponible
+                    }
+                })
             }
 
         }, 150)
@@ -588,29 +605,49 @@ input, textarea, select {
 
         setIsPicking(next)
 
-        if (next) {
+            if (next) {
 
-            if (tabIdRef.current) {
+                if (tabIdRef.current) {
 
-                chrome.tabs.sendMessage(tabIdRef.current, { type: 'START_PICKER' })
+                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'START_PICKER' }, () => {
+
+                        // Ignorer les erreurs silencieusement
+
+                        if (chrome.runtime.lastError) {
+
+                            // Erreur normale si le content script n'est pas chargé
+
+                        }
+
+                    })
+
+                }
+
+                showStatus('Cliquez sur un élément...')
+
+            } else {
+
+                // Annuler la sélection
+
+                if (tabIdRef.current) {
+
+                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' }, () => {
+
+                        // Ignorer les erreurs silencieusement
+
+                        if (chrome.runtime.lastError) {
+
+                            // Erreur normale si le content script n'est pas chargé
+
+                        }
+
+                    })
+
+                }
+
+                showStatus('Sélection annulée')
 
             }
-
-            showStatus('Cliquez sur un élément...')
-
-        } else {
-
-            // Annuler la sélection
-
-            if (tabIdRef.current) {
-
-                chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' })
-
-            }
-
-            showStatus('Sélection annulée')
-
-        }
 
     }
 
@@ -725,6 +762,86 @@ input, textarea, select {
             }
 
         }
+
+    }
+
+
+
+    const forceApplyStyle = () => {
+
+        if (!isConnected) {
+
+            showStatus('Veuillez rafraîchir la page')
+
+            return
+
+        }
+
+
+
+        if (!tabIdRef.current) {
+
+            showStatus('Aucun onglet actif')
+
+            return
+
+        }
+
+
+
+        // Générer le CSS complet
+
+        const combinedCSS = generateFullCSS()
+
+
+
+        if (!combinedCSS || combinedCSS.trim() === '') {
+
+            showStatus('Aucun CSS à appliquer')
+
+            return
+
+        }
+
+
+
+        // Envoyer le message au content script
+
+        chrome.tabs.sendMessage(tabIdRef.current, {
+
+            type: 'APPLY_CSS',
+
+            payload: { css: combinedCSS }
+
+        }, (response) => {
+
+            if (chrome.runtime.lastError) {
+
+                showStatus('Erreur lors de l\'injection')
+
+            } else {
+
+                showStatus('Styles appliqués avec succès !')
+
+            }
+
+        })
+
+
+
+        // Déclencher aussi une réinjection complète via le background script pour les iframes
+
+        chrome.runtime.sendMessage({ type: 'REFRESH_INJECTION' }, () => {
+
+            // Ignorer les erreurs silencieusement
+
+            if (chrome.runtime.lastError) {
+
+                // Erreur normale si le background script n'est pas disponible
+
+            }
+
+        })
 
     }
 
@@ -1531,23 +1648,55 @@ input, textarea, select {
 
             <footer className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm">
 
-                <p className="text-center text-[10px] text-slate-500 font-medium italic min-h-[1.5rem] leading-tight flex items-center justify-center gap-2">
+                <div className="flex items-center justify-between gap-3">
 
-                    {status ? (
+                    <p className="text-center text-[10px] text-slate-500 font-medium italic min-h-[1.5rem] leading-tight flex items-center justify-center gap-2 flex-1">
 
-                        <span className="flex items-center gap-1 text-indigo-500 animate-in fade-in slide-in-from-bottom-1">
+                        {status ? (
 
-                            <Zap size={10} className="fill-current" /> {status}
+                            <span className="flex items-center gap-1 text-indigo-500 animate-in fade-in slide-in-from-bottom-1">
 
-                        </span>
+                                <Zap size={10} className="fill-current" /> {status}
 
-                    ) : (
+                            </span>
 
-                        <span className="opacity-40">Auto-sauvegarde active</span>
+                        ) : (
 
-                    )}
+                            <span className="opacity-40">Auto-sauvegarde active</span>
 
-                </p>
+                        )}
+
+                    </p>
+
+                    <button
+
+                        onClick={forceApplyStyle}
+
+                        disabled={!isConnected}
+
+                        className={cn(
+
+                            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+
+                            isConnected
+
+                                ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20"
+
+                                : "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+
+                        )}
+
+                        title={isConnected ? "Forcer l'application des styles" : "Veuillez rafraîchir la page"}
+
+                    >
+
+                        <CheckCircle2 size={14} />
+
+                        Apply Style
+
+                    </button>
+
+                </div>
 
             </footer>
 

@@ -30,9 +30,57 @@ function generateCombinedCSS(data: StorageSchema, hostname: string): string {
         if (gvCSS) combinedCSS += `/* Global Visual Edits */\n${gvCSS}\n\n`;
     }
 
-    // 3. Site-Specific CSS
+    // 3. CSS des presets globaux
+    if (data.presets) {
+        for (const preset of Object.values(data.presets)) {
+            if (preset.globalEnabled && preset.css) {
+                combinedCSS += `/* Preset: ${preset.name} */\n${preset.css}\n\n`;
+                if (preset.visualEdits) {
+                    for (const [selector, props] of Object.entries(preset.visualEdits)) {
+                        combinedCSS += `${selector} { `;
+                        for (const [p, v] of Object.entries(props)) combinedCSS += `${p}: ${v} !important; `;
+                        combinedCSS += `}\n`;
+                    }
+                }
+                combinedCSS += '\n';
+            }
+        }
+    }
+
+    // 4. Site-Specific CSS
     const siteConfig = data.sites?.[hostname];
     if (siteConfig && siteConfig.enabled !== false) {
+        // CSS des groupes de variantes
+        if (siteConfig.variantGroupId && data.variantGroups) {
+            const variantGroup = data.variantGroups[siteConfig.variantGroupId];
+            if (variantGroup && variantGroup.enabled) {
+                combinedCSS += `/* Variante: ${variantGroup.name} */\n${variantGroup.css}\n\n`;
+                for (const [selector, props] of Object.entries(variantGroup.visualEdits)) {
+                    combinedCSS += `${selector} { `;
+                    for (const [p, v] of Object.entries(props)) combinedCSS += `${p}: ${v} !important; `;
+                    combinedCSS += `}\n`;
+                }
+                combinedCSS += '\n';
+            }
+        }
+
+        // CSS des presets pour ce site
+        if (data.presets && hostname) {
+            for (const preset of Object.values(data.presets)) {
+                if (preset.enabledSites?.includes(hostname) && preset.css) {
+                    combinedCSS += `/* Preset: ${preset.name} */\n${preset.css}\n\n`;
+                    if (preset.visualEdits) {
+                        for (const [selector, props] of Object.entries(preset.visualEdits)) {
+                            combinedCSS += `${selector} { `;
+                            for (const [p, v] of Object.entries(props)) combinedCSS += `${p}: ${v} !important; `;
+                            combinedCSS += `}\n`;
+                        }
+                    }
+                    combinedCSS += '\n';
+                }
+            }
+        }
+
         if (siteConfig.css) combinedCSS += `/* Site CSS (${hostname}) */\n${siteConfig.css}\n\n`;
 
         if (siteConfig.visualEdits) {
@@ -52,26 +100,43 @@ function generateCombinedCSS(data: StorageSchema, hostname: string): string {
 }
 
 /**
- * Perform injection into a specific tab via messaging (Reactive)
+ * Perform injection into a specific tab via messaging (Reactive) and direct CSS injection for iframes
  */
 async function injectToTab(tabId: number, url: string) {
     try {
         const hostname = new URL(url).hostname;
-        const data = await chrome.storage.local.get(['globalEnabled', 'globalCSS', 'globalVisualEdits', 'sites']) as StorageSchema;
+        const data = await chrome.storage.local.get(['globalEnabled', 'globalCSS', 'globalVisualEdits', 'sites', 'variantGroups', 'presets']) as StorageSchema;
 
         const css = generateCombinedCSS(data, hostname);
 
-        // We attempt to send the message. If the content script is not yet loaded, 
-        // we use scripting.insertCSS as a fallback for the first load (to avoid FOUC)
-        // but the content script will take over for reactivity.
+        if (!css || css.trim() === '') return;
+
+        // Fonction pour injecter le CSS dans toutes les frames (y compris les iframes)
+        const injectCSS = () => {
+            chrome.scripting.insertCSS({
+                target: { 
+                    tabId: tabId,
+                    allFrames: true  // Injecter dans toutes les frames, y compris les iframes
+                },
+                css: css
+            }).catch((err) => {
+                console.log("Impossible d'injecter le CSS:", err);
+            });
+        };
+
+        // Injection immédiate dans toutes les frames
+        injectCSS();
+
+        // Réinjection après 1500ms pour les iframes tardives
+        setTimeout(() => injectCSS(), 1500);
+
+        // Réinjection après 3000ms pour les iframes très tardives
+        setTimeout(() => injectCSS(), 3000);
+
+        // Envoyer aussi le message au content script pour la réactivité (mise à jour en temps réel)
         chrome.tabs.sendMessage(tabId, { type: 'APPLY_CSS', payload: { css } }, (response) => {
-            if (chrome.runtime.lastError) {
-                // Fallback: Use scripting.insertCSS for initial load if message fails
-                chrome.scripting.insertCSS({
-                    target: { tabId, allFrames: true },
-                    css: css
-                }).catch(() => { });
-            }
+            // Le message peut échouer si le content script n'est pas encore chargé, c'est normal
+            // L'injection directe avec allFrames garantit que le CSS est appliqué
         });
     } catch (error) {
         console.error('Injection error:', error);
@@ -92,8 +157,44 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (tabs[0]?.id && tabs[0].url) {
                 injectToTab(tabs[0].id, tabs[0].url);
             }
+            // Répondre après l'injection
+            sendResponse({ status: 'refreshed' });
         });
+        return true; // Réponse asynchrone
+    } else if (message.type === 'INJECT_CSS_ALL_FRAMES') {
+        // Injection directe du CSS dans toutes les frames (y compris les iframes)
+        // comme dans inject-style
+        const { css, tabId } = message.payload;
+        if (css && tabId) {
+            const injectCSS = () => {
+                chrome.scripting.insertCSS({
+                    target: { 
+                        tabId: tabId,
+                        allFrames: true  // Injecter dans toutes les frames, y compris les iframes
+                    },
+                    css: css
+                }).catch((err) => {
+                    console.log("Impossible d'injecter le CSS:", err);
+                });
+            };
+            
+            // Injection immédiate
+            injectCSS();
+            
+            // Réinjection après 1500ms pour les iframes tardives
+            setTimeout(() => injectCSS(), 1500);
+            
+            // Réinjection après 3000ms pour les iframes très tardives
+            setTimeout(() => injectCSS(), 3000);
+            
+            // Répondre immédiatement
+            sendResponse({ status: 'injected' });
+        } else {
+            sendResponse({ status: 'error', message: 'Missing css or tabId' });
+        }
+        return false; // Réponse synchrone
     }
+    return false; // Pas de réponse pour les autres messages
 });
 
 export { }

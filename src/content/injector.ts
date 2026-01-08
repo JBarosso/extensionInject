@@ -10,9 +10,35 @@
         document.documentElement.appendChild(styleTag);
     }
 
-    const applyCSS = (css: string) => {
+    const applyCSS = (css: string, tabId?: number) => {
+        // Mettre à jour la balise style pour la réactivité dans cette frame
         if (styleTag) {
             styleTag.textContent = css;
+        }
+        
+        // Demander au background script d'injecter le CSS dans toutes les frames (y compris les iframes)
+        // via chrome.scripting.insertCSS avec allFrames: true (comme dans inject-style)
+        const injectToAllFrames = (targetTabId: number) => {
+            chrome.runtime.sendMessage({
+                type: 'INJECT_CSS_ALL_FRAMES',
+                payload: { 
+                    css,
+                    tabId: targetTabId
+                }
+            }).catch(() => {
+                // Ignorer les erreurs si le background script n'est pas disponible
+            });
+        };
+        
+        if (tabId) {
+            injectToAllFrames(tabId);
+        } else {
+            // Si pas de tabId, essayer de le récupérer via chrome.tabs.query
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0]?.id) {
+                    injectToAllFrames(tabs[0].id);
+                }
+            });
         }
     };
 
@@ -145,17 +171,23 @@
     // Listen for messages from the extension
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.type === 'APPLY_CSS') {
-            applyCSS(message.payload.css);
+            const tabId = sender?.tab?.id;
+            applyCSS(message.payload.css, tabId);
             sendResponse({ status: 'applied' });
+            return false; // Réponse synchrone
         } else if (message.type === 'PING') {
             sendResponse({ type: 'PONG' });
+            return false; // Réponse synchrone
         } else if (message.type === 'START_DRAG') {
             startDragMode(message.payload.selector);
             sendResponse({ status: 'drag_started' });
+            return false; // Réponse synchrone
         } else if (message.type === 'STOP_DRAG') {
             stopDragMode();
             sendResponse({ status: 'drag_stopped' });
+            return false; // Réponse synchrone
         }
+        return false; // Pas de réponse pour les autres messages
     });
 
     // Signal readiness to background or sidepanel if needed

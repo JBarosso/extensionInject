@@ -114,7 +114,7 @@ async function injectToTab(tabId: number, url: string) {
         // Fonction pour injecter le CSS dans toutes les frames (y compris les iframes)
         const injectCSS = () => {
             chrome.scripting.insertCSS({
-                target: { 
+                target: {
                     tabId: tabId,
                     allFrames: true  // Injecter dans toutes les frames, y compris les iframes
                 },
@@ -135,6 +135,11 @@ async function injectToTab(tabId: number, url: string) {
 
         // Envoyer aussi le message au content script pour la réactivité (mise à jour en temps réel)
         chrome.tabs.sendMessage(tabId, { type: 'APPLY_CSS', payload: { css } }, (response) => {
+            // Suppress error when content script is not ready (page refreshing)
+            if (chrome.runtime.lastError) {
+                void chrome.runtime.lastError;
+                return;
+            }
             // Le message peut échouer si le content script n'est pas encore chargé, c'est normal
             // L'injection directe avec allFrames garantit que le CSS est appliqué
         });
@@ -168,7 +173,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (css && tabId) {
             const injectCSS = () => {
                 chrome.scripting.insertCSS({
-                    target: { 
+                    target: {
                         tabId: tabId,
                         allFrames: true  // Injecter dans toutes les frames, y compris les iframes
                     },
@@ -177,16 +182,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     console.log("Impossible d'injecter le CSS:", err);
                 });
             };
-            
+
             // Injection immédiate
             injectCSS();
-            
+
             // Réinjection après 1500ms pour les iframes tardives
             setTimeout(() => injectCSS(), 1500);
-            
+
             // Réinjection après 3000ms pour les iframes très tardives
             setTimeout(() => injectCSS(), 3000);
-            
+
             // Répondre immédiatement
             sendResponse({ status: 'injected' });
         } else {

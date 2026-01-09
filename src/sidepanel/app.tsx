@@ -79,17 +79,19 @@ export default function App() {
                 tabIdRef.current = tab.id
 
                 chrome.tabs.sendMessage(tab.id, { type: 'PING' }, (response) => {
-
-                    if (chrome.runtime.lastError || !response) {
-
-                        setIsConnected(false)
-
-                    } else {
-
-                        setIsConnected(true)
-
+                    // Suppress error message when page is refreshing
+                    if (chrome.runtime.lastError) {
+                        // Silently handle the error - page is likely reloading
+                        void chrome.runtime.lastError;
+                        setIsConnected(false);
+                        return;
                     }
 
+                    if (!response) {
+                        setIsConnected(false)
+                    } else {
+                        setIsConnected(true)
+                    }
                 })
 
 

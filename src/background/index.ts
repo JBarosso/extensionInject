@@ -14,6 +14,10 @@ function generateCombinedCSS(data: StorageSchema, hostname: string): string {
 
     if (data.globalEnabled === false) return '';
 
+    // Check if specifically disabled for this site
+    const siteConfig = data.sites?.[hostname];
+    if (siteConfig?.enabled === false) return '';
+
     // 1. Global CSS
     if (data.globalCSS) combinedCSS += `/* Global CSS */\n${data.globalCSS}\n\n`;
 
@@ -48,8 +52,7 @@ function generateCombinedCSS(data: StorageSchema, hostname: string): string {
     }
 
     // 4. Site-Specific CSS
-    const siteConfig = data.sites?.[hostname];
-    if (siteConfig && siteConfig.enabled !== false) {
+    if (siteConfig && siteConfig.enabled) {
         // CSS des groupes de variantes
         if (siteConfig.variantGroupId && data.variantGroups) {
             const variantGroup = data.variantGroups[siteConfig.variantGroupId];

@@ -607,49 +607,49 @@ input, textarea, select {
 
         setIsPicking(next)
 
-            if (next) {
+        if (next) {
 
-                if (tabIdRef.current) {
+            if (tabIdRef.current) {
 
-                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'START_PICKER' }, () => {
+                chrome.tabs.sendMessage(tabIdRef.current, { type: 'START_PICKER' }, () => {
 
-                        // Ignorer les erreurs silencieusement
+                    // Ignorer les erreurs silencieusement
 
-                        if (chrome.runtime.lastError) {
+                    if (chrome.runtime.lastError) {
 
-                            // Erreur normale si le content script n'est pas chargé
+                        // Erreur normale si le content script n'est pas chargé
 
-                        }
+                    }
 
-                    })
-
-                }
-
-                showStatus('Cliquez sur un élément...')
-
-            } else {
-
-                // Annuler la sélection
-
-                if (tabIdRef.current) {
-
-                    chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' }, () => {
-
-                        // Ignorer les erreurs silencieusement
-
-                        if (chrome.runtime.lastError) {
-
-                            // Erreur normale si le content script n'est pas chargé
-
-                        }
-
-                    })
-
-                }
-
-                showStatus('Sélection annulée')
+                })
 
             }
+
+            showStatus('Cliquez sur un élément...')
+
+        } else {
+
+            // Annuler la sélection
+
+            if (tabIdRef.current) {
+
+                chrome.tabs.sendMessage(tabIdRef.current, { type: 'STOP_PICKER' }, () => {
+
+                    // Ignorer les erreurs silencieusement
+
+                    if (chrome.runtime.lastError) {
+
+                        // Erreur normale si le content script n'est pas chargé
+
+                    }
+
+                })
+
+            }
+
+            showStatus('Sélection annulée')
+
+        }
 
     }
 
@@ -1166,22 +1166,24 @@ input, textarea, select {
                         </button>
 
                         <div className={cn(
-
                             "flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer",
-
-                            globalEnabled ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-600" : "bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400"
-
-                        )} onClick={() => setGlobalEnabled(!globalEnabled)}>
-
-                            <span className="text-[10px] font-black uppercase tracking-widest pointer-events-none">Global</span>
-
-                            <div className={cn("w-8 h-4 rounded-full relative transition-colors pointer-events-none", globalEnabled ? "bg-indigo-500" : "bg-slate-400 dark:bg-slate-600")}>
-
-
-                                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-200 shadow-sm", globalEnabled ? "translate-x-[18px]" : "translate-x-[2px]")} />
-
+                            currentDomain && currentSiteConfig.enabled ? "bg-green-500/10 border-green-500/30 text-green-600" : "bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400",
+                            !currentDomain && "opacity-50 cursor-not-allowed"
+                        )} onClick={() => currentDomain && updateSiteConfig({ enabled: !currentSiteConfig.enabled })}>
+                            <span className="text-[10px] font-black uppercase tracking-widest pointer-events-none">Site</span>
+                            <div className={cn("w-8 h-4 rounded-full relative transition-colors pointer-events-none", currentDomain && currentSiteConfig.enabled ? "bg-green-500" : "bg-slate-400 dark:bg-slate-600")}>
+                                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-200 shadow-sm", currentDomain && currentSiteConfig.enabled ? "translate-x-[18px]" : "translate-x-[2px]")} />
                             </div>
+                        </div>
 
+                        <div className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all cursor-pointer",
+                            globalEnabled ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-600" : "bg-slate-200 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400"
+                        )} onClick={() => setGlobalEnabled(!globalEnabled)}>
+                            <span className="text-[10px] font-black uppercase tracking-widest pointer-events-none">Global</span>
+                            <div className={cn("w-8 h-4 rounded-full relative transition-colors pointer-events-none", globalEnabled ? "bg-indigo-500" : "bg-slate-400 dark:bg-slate-600")}>
+                                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all duration-200 shadow-sm", globalEnabled ? "translate-x-[18px]" : "translate-x-[2px]")} />
+                            </div>
                         </div>
 
                     </div>
@@ -1475,169 +1477,169 @@ input, textarea, select {
                         </div>
                     ) : (
                         <>
-                    {/* Mode Switcher */}
+                            {/* Mode Switcher */}
 
-                    <div className="flex items-center justify-between px-1">
+                            <div className="flex items-center justify-between px-1">
 
-                        <div className="flex items-center gap-2 text-slate-500">
+                                <div className="flex items-center gap-2 text-slate-500">
 
-                            {viewMode === 'code' ? <Code2 size={16} /> : <Sparkles size={16} />}
+                                    {viewMode === 'code' ? <Code2 size={16} /> : <Sparkles size={16} />}
 
-                            <h2 className="text-xs font-bold uppercase tracking-widest">{viewMode === 'code' ? 'Code CSS' : 'Editeur Visuel'}</h2>
+                                    <h2 className="text-xs font-bold uppercase tracking-widest">{viewMode === 'code' ? 'Code CSS' : 'Editeur Visuel'}</h2>
 
-                        </div>
+                                </div>
 
-                        <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3">
 
-                            {hasContentToReset && (
+                                    {hasContentToReset && (
 
-                                <button
+                                        <button
 
-                                    onClick={handleReset}
+                                            onClick={handleReset}
 
-                                    className="flex items-center gap-1.5 text-[10px] font-bold text-red-500 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                                            className="flex items-center gap-1.5 text-[10px] font-bold text-red-500 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
 
-                                >
+                                        >
 
-                                    <RotateCcw size={10} /> Reset
-
-                                </button>
-
-                            )}
-
-                            <button onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')} className="text-[10px] font-bold text-indigo-600 hover:underline">
-
-                                {viewMode === 'code' ? 'Visuel' : 'Code'}
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-
-                    {viewMode === 'code' ? (
-
-                        <div className="flex flex-col gap-3 min-h-0 h-full overflow-hidden">
-
-                            {generatedVisualCSSForCurrentTab && (
-
-                                <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl shrink-0">
-
-                                    <div className="flex items-center justify-between mb-2">
-
-                                        <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-
-                                            <Sparkles size={12} /> Code Visuel Généré
-
-                                        </span>
-
-                                        <button onClick={convertVisualToCode} className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded text-[9px] font-bold hover:bg-indigo-700 transition-colors">
-
-                                            <Copy size={10} /> Fusionner
+                                            <RotateCcw size={10} /> Reset
 
                                         </button>
 
-                                    </div>
+                                    )}
 
-                                    <pre className="text-[10px] font-mono text-indigo-400/80 leading-tight">
+                                    <button onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')} className="text-[10px] font-bold text-indigo-600 hover:underline">
 
-                                        {generatedVisualCSSForCurrentTab}
+                                        {viewMode === 'code' ? 'Visuel' : 'Code'}
 
-                                    </pre>
+                                    </button>
 
                                 </div>
-
-                            )}
-
-                            <div className="group relative flex-1 min-h-0">
-
-                                <textarea
-
-                                    value={currentTab === 'global' ? globalCSS : currentSiteConfig.css}
-
-                                    onChange={(e) => currentTab === 'global' ? setGlobalCSS(e.target.value) : updateSiteConfig({ css: e.target.value })}
-
-                                    spellCheck={false}
-
-                                    className="w-full h-full p-4 bg-slate-900 text-blue-300 font-mono text-sm rounded-2xl border border-slate-800 focus:border-indigo-500 outline-none resize-none transition-all custom-scrollbar"
-
-                                    placeholder={`/* Votre CSS personnalisé ici */`}
-
-                                />
 
                             </div>
 
-                        </div>
 
-                    ) : (
 
-                        <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 min-h-0 h-full">
+                            {viewMode === 'code' ? (
 
-                            {selectedSelector ? (
+                                <div className="flex flex-col gap-3 min-h-0 h-full overflow-hidden">
 
-                                <VisualEditor
+                                    {generatedVisualCSSForCurrentTab && (
 
-                                    selector={selectedSelector}
+                                        <div className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl shrink-0">
 
-                                    currentProperties={(currentTab === 'global' ? globalVisualEdits[selectedSelector] : currentSiteConfig.visualEdits[selectedSelector]) || {}}
+                                            <div className="flex items-center justify-between mb-2">
 
-                                    onUpdate={(props) => updateVisualEdit(selectedSelector, props)}
+                                                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
 
-                                    tabId={tabIdRef.current}
+                                                    <Sparkles size={12} /> Code Visuel Généré
 
-                                />
+                                                </span>
+
+                                                <button onClick={convertVisualToCode} className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded text-[9px] font-bold hover:bg-indigo-700 transition-colors">
+
+                                                    <Copy size={10} /> Fusionner
+
+                                                </button>
+
+                                            </div>
+
+                                            <pre className="text-[10px] font-mono text-indigo-400/80 leading-tight">
+
+                                                {generatedVisualCSSForCurrentTab}
+
+                                            </pre>
+
+                                        </div>
+
+                                    )}
+
+                                    <div className="group relative flex-1 min-h-0">
+
+                                        <textarea
+
+                                            value={currentTab === 'global' ? globalCSS : currentSiteConfig.css}
+
+                                            onChange={(e) => currentTab === 'global' ? setGlobalCSS(e.target.value) : updateSiteConfig({ css: e.target.value })}
+
+                                            spellCheck={false}
+
+                                            className="w-full h-full p-4 bg-slate-900 text-blue-300 font-mono text-sm rounded-2xl border border-slate-800 focus:border-indigo-500 outline-none resize-none transition-all custom-scrollbar"
+
+                                            placeholder={`/* Votre CSS personnalisé ici */`}
+
+                                        />
+
+                                    </div>
+
+                                </div>
 
                             ) : (
 
-                                <div className="flex flex-col items-center justify-center h-full py-12 text-center bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 shrink-0">
+                                <div className="flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1 min-h-0 h-full">
 
-                                    <Layout size={32} className="text-slate-300 mb-2" />
+                                    {selectedSelector ? (
 
-                                    <p className="text-sm text-slate-500 font-medium">Prêt à éditer !</p>
+                                        <VisualEditor
 
-                                    <p className="text-[10px] text-slate-400 mt-1">Sélectionnez un élément sur la page</p>
+                                            selector={selectedSelector}
+
+                                            currentProperties={(currentTab === 'global' ? globalVisualEdits[selectedSelector] : currentSiteConfig.visualEdits[selectedSelector]) || {}}
+
+                                            onUpdate={(props) => updateVisualEdit(selectedSelector, props)}
+
+                                            tabId={tabIdRef.current}
+
+                                        />
+
+                                    ) : (
+
+                                        <div className="flex flex-col items-center justify-center h-full py-12 text-center bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 shrink-0">
+
+                                            <Layout size={32} className="text-slate-300 mb-2" />
+
+                                            <p className="text-sm text-slate-500 font-medium">Prêt à éditer !</p>
+
+                                            <p className="text-[10px] text-slate-400 mt-1">Sélectionnez un élément sur la page</p>
+
+                                        </div>
+
+                                    )}
+
+
+
+                                    {/* History */}
+
+                                    {Object.keys(currentTab === 'global' ? globalVisualEdits : currentSiteConfig.visualEdits).length > 0 && (
+
+                                        <div className="flex flex-col gap-2 mt-2 shrink-0">
+
+                                            <div className="flex items-center justify-between px-1">
+
+                                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sélecteurs actifs</h3>
+
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2">
+
+                                                {Object.keys(currentTab === 'global' ? globalVisualEdits : currentSiteConfig.visualEdits).map(sel => (
+
+                                                    <button key={sel} onClick={() => setSelectedSelector(sel)} className={cn("px-3 py-1.5 rounded-full text-[10px] font-mono border transition-all", selectedSelector === sel ? "bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-600/20" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-indigo-400")}>
+
+                                                        {sel}
+
+                                                    </button>
+
+                                                ))}
+
+                                            </div>
+
+                                        </div>
+
+                                    )}
 
                                 </div>
 
                             )}
-
-
-
-                            {/* History */}
-
-                            {Object.keys(currentTab === 'global' ? globalVisualEdits : currentSiteConfig.visualEdits).length > 0 && (
-
-                                <div className="flex flex-col gap-2 mt-2 shrink-0">
-
-                                    <div className="flex items-center justify-between px-1">
-
-                                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sélecteurs actifs</h3>
-
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2">
-
-                                        {Object.keys(currentTab === 'global' ? globalVisualEdits : currentSiteConfig.visualEdits).map(sel => (
-
-                                            <button key={sel} onClick={() => setSelectedSelector(sel)} className={cn("px-3 py-1.5 rounded-full text-[10px] font-mono border transition-all", selectedSelector === sel ? "bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-600/20" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-indigo-400")}>
-
-                                                {sel}
-
-                                            </button>
-
-                                        ))}
-
-                                    </div>
-
-                                </div>
-
-                            )}
-
-                        </div>
-
-                    )}
 
                         </>
                     )}

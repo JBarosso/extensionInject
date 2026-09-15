@@ -2,14 +2,12 @@
     "manifest_version": 3,
     "name": "Injector Style",
     "version": "1.0.0",
-    "description": "Premium CSS and JS injection tool with Sidepanel interface.",
+    "description": "Customize any website's appearance with custom CSS: a visual point-and-click editor, per-site rules, and reusable presets.",
     "permissions": [
         "storage",
         "scripting",
         "activeTab",
-        "sidePanel",
-        "userScripts",
-        "tabs"
+        "sidePanel"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -22,9 +20,18 @@
         "default_path": "src/sidepanel/index.html"
     },
     "action": {
-        "default_title": "Open Injector Pro"
+        "default_title": "Open Injector Style",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
     },
     "icons": {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
         "128": "icons/icon128.png"
     },
     "content_scripts": [

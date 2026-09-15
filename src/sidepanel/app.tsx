@@ -351,7 +351,10 @@ input, textarea, select {
 
         }
 
-    }, [checkConnection])
+        // Mount-once: depending on checkConnection (which changes on every domain
+        // switch) was tearing down and rebuilding the heartbeat/listener/storage
+        // fetch on every navigation, causing the connection state to flap.
+    }, [])
 
 
 

@@ -215,9 +215,11 @@ p {
 }
 
 /* Masquer les éléments distrayants */
-aside, .sidebar, .advertisement, .ads,
-[class*="ad"], [id*="ad"], [class*="banner"],
-[class*="popup"], [class*="modal"] {
+aside, .sidebar, .ad, .ads, .advert, .advertisement,
+[class^="ad-"], [class*=" ad-"], [class*="-ad-"], [class*="-ad "], [class$="-ad"],
+[id^="ad-"], [id^="ad_"], [id^="div-gpt-ad"],
+[class*="advert"], [id*="advert"], ins.adsbygoogle,
+[class*="banner"], [class*="popup"], [class*="modal"] {
     display: none !important;
 }`,
                         visualEdits: {},

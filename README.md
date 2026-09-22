@@ -160,6 +160,10 @@ npm run preview
 - `sidePanel` : Affichage du panneau latéral
 - `<all_urls>` : Injection sur tous les sites
 
+## 🔒 Confidentialité
+
+Injector Style ne collecte, ne transmet et ne vend aucune donnée personnelle. Tout est stocké localement via `chrome.storage.local` ; aucun serveur distant, tracker ou outil d'analyse. Politique complète : [docs/privacy.html](docs/privacy.html) (publiée via GitHub Pages une fois activée sur ce dépôt).
+
 ## 📝 Notes importantes
 
 - ⚠️ **Rafraîchissement** : Si l'extension ne fonctionne pas, rafraîchissez la page

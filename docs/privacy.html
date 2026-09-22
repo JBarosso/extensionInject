@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Politique de confidentialité — Injector Style</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+    line-height: 1.7;
+    color: #1a1a2e;
+    background: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e5e7eb; background: #0f1117; }
+    a { color: #818cf8; }
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+  .meta { color: #6b7280; font-size: 0.9rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; }
+  ul { padding-left: 1.3rem; }
+  code { background: rgba(99,102,241,0.12); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.9em; }
+  a { color: #4f46e5; }
+</style>
+</head>
+<body>
+
+<h1>Politique de confidentialité — Injector Style</h1>
+<p class="meta">Dernière mise à jour : 22 septembre 2026</p>
+
+<p>Injector Style est une extension Chrome qui permet d'appliquer du CSS personnalisé sur les sites web que vous visitez (édition visuelle, CSS par site, presets réutilisables).</p>
+
+<h2>Quelles données sont collectées ?</h2>
+<p><strong>Aucune.</strong> Injector Style ne collecte, ne transmet et ne vend aucune donnée personnelle. L'extension ne contient aucun serveur distant, aucun outil d'analyse (analytics), aucun tracker et aucun appel réseau.</p>
+
+<h2>Où sont stockées vos configurations ?</h2>
+<p>Vos règles CSS, vos presets et vos préférences sont enregistrés uniquement en local sur votre appareil, via l'API <code>chrome.storage.local</code> du navigateur. Ces données ne quittent jamais votre ordinateur et ne sont partagées avec personne, y compris le développeur de l'extension.</p>
+
+<h2>Pourquoi ces permissions ?</h2>
+<ul>
+  <li><strong>storage</strong> — sauvegarder localement vos configurations CSS.</li>
+  <li><strong>scripting</strong> — injecter votre CSS personnalisé dans la page.</li>
+  <li><strong>activeTab</strong> — appliquer les modifications à l'onglet actif lorsque vous utilisez l'extension.</li>
+  <li><strong>sidePanel</strong> — afficher l'interface de l'extension dans le panneau latéral de Chrome.</li>
+  <li><strong>Accès à tous les sites (<code>&lt;all_urls&gt;</code>)</strong> — vous pouvez personnaliser n'importe quel site ; le CSS enregistré doit pouvoir être réappliqué automatiquement, quel que soit le site visité.</li>
+</ul>
+
+<h2>Suppression de vos données</h2>
+<p>Vous pouvez supprimer toutes les données de l'extension à tout moment en la désinstallant depuis <code>chrome://extensions</code>, ou en effaçant son stockage local via les outils de développement de Chrome.</p>
+
+<h2>Modifications de cette politique</h2>
+<p>Cette page peut être mise à jour si les fonctionnalités de l'extension évoluent. La date de dernière mise à jour est indiquée en haut de page.</p>
+
+<h2>Contact</h2>
+<p>Pour toute question concernant cette politique, ouvrez une <a href="https://github.com/JBarosso/extensionInject/issues">issue sur le dépôt GitHub</a>.</p>
+
+</body>
+</html>
